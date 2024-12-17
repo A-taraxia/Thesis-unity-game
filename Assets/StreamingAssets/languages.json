@@ -1,0 +1,12 @@
+{
+    "English": {
+        "start_game": "Start Game",
+        "exit_game": "Exit Game",
+        "settings": "Settings"
+    },
+    "Greek": {
+        "start_game": "Έναρξη Παιχνιδιού",
+        "exit_game": "Έξοδος",
+        "settings": "Ρυθμίσεις"
+    }
+}
