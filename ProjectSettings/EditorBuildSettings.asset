@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/SittingCutscene.unity
     guid: 9c830803234c61847902ab191edf54bf
+  - enabled: 1
+    path: Assets/Scenes/MainPartTrain.unity
+    guid: c5c6d4539eb420240b0e7f6717cbb1a8
   m_configObjects: {}
