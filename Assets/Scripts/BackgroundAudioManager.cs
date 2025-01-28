@@ -7,13 +7,13 @@ public class BackgroundAudioManager : MonoBehaviour
 
     void Awake()
     {
-        // Check if an instance already exists
+        // Singleton pattern
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Make this object persist across scenes
+            DontDestroyOnLoad(gameObject); // Make it persist across scenes
 
-            // Add an AudioSource component to this GameObject if it doesn't exist
+            // Get or create an AudioSource component
             audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
             {
@@ -41,6 +41,22 @@ public class BackgroundAudioManager : MonoBehaviour
         if (audioSource.isPlaying)
         {
             audioSource.Stop();
+        }
+    }
+
+    public void PauseBackgroundAudio()
+    {
+        if (audioSource.isPlaying)
+        {
+            audioSource.Pause();
+        }
+    }
+
+    public void ResumeBackgroundAudio()
+    {
+        if (!audioSource.isPlaying)
+        {
+            audioSource.UnPause();
         }
     }
 }
