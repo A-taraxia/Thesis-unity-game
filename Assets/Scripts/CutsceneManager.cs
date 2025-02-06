@@ -7,7 +7,6 @@ public class CutsceneManager : MonoBehaviour
 
     public void OnCutsceneEnd()
     {
-        Debug.Log("Cutscene ended. Loading next scene...");
         SceneManager.LoadScene(nextSceneName);
     }
 }
