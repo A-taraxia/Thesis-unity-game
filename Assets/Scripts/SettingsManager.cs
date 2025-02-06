@@ -1,21 +1,23 @@
-using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using UnityEngine.EventSystems;
+using TMPro;
+
 
 public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager Instance;
 
-    public GameObject settingsPanel;                 // Reference to the settings panel
-    public Slider volumeSlider;                      // Reference to the volume slider
-    private float defaultVolume = 1f;                // Default volume value
+    public GameObject settingsPanel;
+    public Slider volumeSlider;
+    public TMP_Dropdown languageDropdown;
 
-    private bool isPaused = false;                   // Track if the game is paused
+    private float defaultVolume = 1f;
+    private bool isPaused = false;
 
     void Awake()
     {
-        // Singleton Pattern to persist SettingsManager across scenes
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -28,11 +30,11 @@ public class SettingsManager : MonoBehaviour
     void Start()
     {
         InitializeVolume();
+        InitializeLanguageDropdown();
     }
 
     void Update()
     {
-        // Open/close settings with F2
         if (Input.GetKeyDown(KeyCode.F2))
         {
             ToggleSettingsPanel();
@@ -41,78 +43,142 @@ public class SettingsManager : MonoBehaviour
 
     private void InitializeVolume()
     {
-        // Load saved volume or use default
         float savedVolume = PlayerPrefs.GetFloat("Volume", defaultVolume);
         AudioListener.volume = savedVolume;
 
         if (volumeSlider != null)
         {
-            volumeSlider.value = savedVolume * 100f; // Initialize slider value
+            volumeSlider.value = savedVolume * 100f;
             volumeSlider.onValueChanged.AddListener(delegate { AdjustVolume(); });
         }
     }
 
-
-public void ToggleSettingsPanel()
-{
-    if (settingsPanel == null)
+    private void InitializeLanguageDropdown()
     {
-        Debug.LogError("SettingsPanel is not assigned in the Inspector!");
-        return;
-    }
-
-    isPaused = !settingsPanel.activeSelf; // Toggle the pause state
-    settingsPanel.SetActive(!settingsPanel.activeSelf); // Show/hide the panel
-
-    if (settingsPanel.activeSelf)
-    {
-        // Pause the game and show the cursor
-        Time.timeScale = 0f;
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.None;
-
-        // Pause background audio only if it still exists
-        if (BackgroundAudioManager.Instance != null)
+        if (languageDropdown != null)
         {
-            BackgroundAudioManager.Instance.PauseBackgroundAudio();
+            languageDropdown.onValueChanged.AddListener(ChangeLanguage);
+            languageDropdown.value = PlayerPrefs.GetInt("Language", 0); // Load saved language
         }
-            // Ensure UI elements are interactable
-            EventSystem.current?.SetSelectedGameObject(null); // Reset selection
     }
-    else
-    {
-        // Resume the game
-        Time.timeScale = 1f;
 
-        // Check if we're in the Main Menu
-        if (SceneManager.GetActiveScene().name == "MainMenu")
+    public void ChangeLanguage(int index)
+    {
+        LocalizationManager.Instance.ChangeLanguage(index);
+    }
+
+    public void ToggleSettingsPanel()
+    {
+        if (settingsPanel == null)
         {
-            // Keep the cursor visible and unlocked in the Main Menu
+            Debug.LogError("SettingsPanel is not assigned in the Inspector!");
+            return;
+        }
+
+        isPaused = !settingsPanel.activeSelf;
+        settingsPanel.SetActive(!settingsPanel.activeSelf);
+
+        if (settingsPanel.activeSelf)
+        {
+            Time.timeScale = 0f;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+
+            if (BackgroundAudioManager.Instance != null)
+            {
+                BackgroundAudioManager.Instance.PauseBackgroundAudio();
+            }
+
+            EventSystem.current?.SetSelectedGameObject(null);
         }
         else
         {
-            // Hide and lock the cursor in other scenes (gameplay)
-            Cursor.visible = false;
-            Cursor.lockState = CursorLockMode.Locked;
-        }
-            // Resume background audio only if it still exists
+            Time.timeScale = 1f;
+
+            if (SceneManager.GetActiveScene().name == "MainMenu")
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+            }
+            else
+            {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
+            }
+
             if (BackgroundAudioManager.Instance != null)
             {
                 BackgroundAudioManager.Instance.ResumeBackgroundAudio();
             }
         }
-}
-
+    }
 
     public void AdjustVolume()
     {
         if (volumeSlider != null)
         {
-            float newVolume = volumeSlider.value / 100f; // Normalize slider value
+            float newVolume = volumeSlider.value / 100f;
             AudioListener.volume = newVolume;
-            PlayerPrefs.SetFloat("Volume", newVolume); // Save the new volume
+            PlayerPrefs.SetFloat("Volume", newVolume);
         }
     }
+    public void CloseSettings()
+    {
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+
+        // Resume the game
+        Time.timeScale = 1f;
+
+        if (SceneManager.GetActiveScene().name == "MainMenu")
+        {
+            // In Main Menu: Keep the cursor visible and unlocked
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            // In gameplay: Hide and lock the cursor
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
+
+        // Resume background audio if it was paused
+        if (BackgroundAudioManager.Instance != null)
+        {
+            BackgroundAudioManager.Instance.ResumeBackgroundAudio();
+        }
+    }
+    public void OpenSettings()
+    {
+        // Ensure settingsPanel is correctly assigned
+        if (settingsPanel == null)
+        {
+            settingsPanel = GameObject.Find("SettingsPanel"); // Auto-find it
+        }
+
+        if (settingsPanel == null)
+        {
+            Debug.LogError("SettingsPanel is missing in this scene!");
+            return;
+        }
+
+        settingsPanel.SetActive(true);
+        isPaused = true;
+
+        // Pause the game
+        Time.timeScale = 0f;
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+
+        // Pause background audio if it exists
+        if (BackgroundAudioManager.Instance != null)
+        {
+            BackgroundAudioManager.Instance.PauseBackgroundAudio();
+        }
+    }
+
+
 }

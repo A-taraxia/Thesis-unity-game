@@ -1,72 +1,102 @@
-using System.IO;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+using TMPro; // If using TextMeshPro
 
 public class LocalizationManager : MonoBehaviour
 {
-    public static LocalizationManager instance;
-    private LanguageData localizedText;
-    private string currentLanguage = "English";
+    public static LocalizationManager Instance;
+
+    public enum Language { English, Greek }
+    private Language currentLanguage = Language.English;
+
+    private Dictionary<string, string> englishTexts = new Dictionary<string, string>()
+    {
+        {"start_game", "Start Game"},
+        {"exit_game", "Exit Game"},
+        {"settings", "Settings"},
+        {"exit_prompt", "Do you want to exit to the main menu?"},
+        {"yes", "Yes"},
+        {"no", "No"},
+        {"volume", "Volume"},
+        {"language", "Language"},
+        {"closeSettings", "Close"},
+        {"findSeat", "Find your seat."},
+    };
+
+    private Dictionary<string, string> greekTexts = new Dictionary<string, string>()
+    {
+        {"start_game", "Ξεκίνα"},
+        {"exit_game", "Έξοδος"},
+        {"settings", "Ρυθμίσεις"},
+        {"exit_prompt", "Θέλετε να επιστρέψετε στο κύριο μενού;"},
+        {"yes", "Ναι"},
+        {"no", "Όχι"},
+        {"volume", "Ένταση"},
+        {"language", "Γλώσσα"},
+        {"closeSettings", "Κλείσιμο"},
+        {"findSeat", "Βρες την θέση σου."},
+    };
+
+    private Dictionary<string, string> activeLanguageDictionary;
 
     void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
+            return;
         }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+        LoadLanguage(); // Load saved language preference
+        SceneManager.sceneLoaded += OnSceneLoaded; // Apply language when a new scene loads
     }
 
-    public void SetLanguage(int languageIndex)
+    void OnDestroy()
     {
-        string[] languages = { "English", "Greek" };
-        currentLanguage = languages[languageIndex];
-
-        LoadLocalizedText();
+        SceneManager.sceneLoaded -= OnSceneLoaded; // Clean up to prevent memory leaks
     }
 
-    private void LoadLocalizedText()
+    private void LoadLanguage()
     {
-        string filePath = Path.Combine(Application.streamingAssetsPath, "languages.json");
-
-        if (File.Exists(filePath))
-        {
-            string dataAsJson = File.ReadAllText(filePath);
-            LocalizationData loadedData = JsonUtility.FromJson<LocalizationData>(dataAsJson);
-
-            if (currentLanguage == "English")
-            {
-                localizedText = loadedData.English;
-            }
-            else if (currentLanguage == "Greek")
-            {
-                localizedText = loadedData.Greek;
-            }
-
-            Debug.Log("Loaded language: " + currentLanguage);
-        }
-        else
-        {
-            Debug.LogError("Cannot find file: " + filePath);
-        }
+        int savedLanguage = PlayerPrefs.GetInt("Language", 0); // Default: English (0)
+        currentLanguage = (Language)savedLanguage;
+        activeLanguageDictionary = (currentLanguage == Language.English) ? englishTexts : greekTexts;
     }
 
-    public string GetLocalizedValue(string key)
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        switch (key)
+        UpdateLocalizedText(); // Update text when a new scene loads
+    }
+
+    public void ChangeLanguage(int languageIndex)
+    {
+        currentLanguage = (Language)languageIndex;
+        PlayerPrefs.SetInt("Language", languageIndex);
+        PlayerPrefs.Save();
+        activeLanguageDictionary = (currentLanguage == Language.English) ? englishTexts : greekTexts;
+
+        UpdateLocalizedText(); // Update all localized text in the scene
+    }
+
+    public string GetLocalizedText(string key)
+    {
+        if (activeLanguageDictionary.ContainsKey(key))
         {
-            case "start_game":
-                return localizedText.start_game;
-            case "exit_game":
-                return localizedText.exit_game;
-            case "settings":
-                return localizedText.settings;
-            default:
-                Debug.LogWarning("Key not found: " + key);
-                return key;
+            return activeLanguageDictionary[key];
+        }
+        return key; // Fallback to key if not found
+    }
+
+    public void UpdateLocalizedText()
+    {
+        LocalizedText[] localizedTexts = FindObjectsOfType<LocalizedText>();
+        foreach (LocalizedText text in localizedTexts)
+        {
+            text.UpdateText();
         }
     }
 }
