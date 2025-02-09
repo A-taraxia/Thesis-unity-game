@@ -1145,7 +1145,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 426848868}
         m_TargetAssemblyTypeName: ExitPopupManager, Assembly-CSharp
         m_MethodName: ConfirmExit
         m_Mode: 1
@@ -2918,7 +2918,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 426848868}
         m_TargetAssemblyTypeName: ExitPopupManager, Assembly-CSharp
         m_MethodName: CancelExit
         m_Mode: 1

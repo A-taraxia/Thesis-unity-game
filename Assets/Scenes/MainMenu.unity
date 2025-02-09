@@ -2016,6 +2016,7 @@ MonoBehaviour:
   settingsPanel: {fileID: 1715524508}
   volumeSlider: {fileID: 349820151}
   languageDropdown: {fileID: 101702452}
+  volumeText: {fileID: 955682228}
 --- !u!1 &955682226
 GameObject:
   m_ObjectHideFlags: 0

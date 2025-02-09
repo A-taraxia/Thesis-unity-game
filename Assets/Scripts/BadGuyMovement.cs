@@ -1,6 +1,8 @@
 using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+
 
 public class BadGuyMovement : MonoBehaviour
 {
@@ -66,7 +68,6 @@ public class BadGuyMovement : MonoBehaviour
 
         if (currentPositionIndex == positions.Length - 1)
         {
-            Debug.Log("Game Over - Bad Guy is too close!");
             EndGame();
         }
 
@@ -118,6 +119,13 @@ public class BadGuyMovement : MonoBehaviour
 
     void EndGame()
     {
-        Debug.Log("Game Over - Implement your end screen here");
+        // Destroy background music when transitioning to the statistics scene
+        if (BackgroundAudioManager.Instance != null)
+        {
+            Destroy(BackgroundAudioManager.Instance.gameObject);
+        }
+
+        // Load the next scene
+        SceneManager.LoadScene("StatisticsScene");
     }
 }
