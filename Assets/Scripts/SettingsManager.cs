@@ -12,6 +12,8 @@ public class SettingsManager : MonoBehaviour
     public GameObject settingsPanel;
     public Slider volumeSlider;
     public TMP_Dropdown languageDropdown;
+    public TextMeshProUGUI volumeText;
+
 
     private float defaultVolume = 1f;
     private bool isPaused = false;
@@ -80,6 +82,9 @@ public class SettingsManager : MonoBehaviour
 
         if (settingsPanel.activeSelf)
         {
+            // Ensure volume number updates when opening settings
+            UpdateVolumeText();
+
             Time.timeScale = 0f;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
@@ -112,6 +117,7 @@ public class SettingsManager : MonoBehaviour
             }
         }
     }
+
 
     public void AdjustVolume()
     {
@@ -178,7 +184,20 @@ public class SettingsManager : MonoBehaviour
         {
             BackgroundAudioManager.Instance.PauseBackgroundAudio();
         }
+
+        // Update the volume text immediately when opening settings
+        UpdateVolumeText();
     }
+
+    public void UpdateVolumeText()
+    {
+        if (volumeSlider != null && volumeText != null)
+        {
+            string localizedVolumeText = LocalizationManager.Instance.GetLocalizedText("volume");
+            volumeText.text = localizedVolumeText + ": " + volumeSlider.value.ToString("0");
+        }
+    }
+
 
 
 }
