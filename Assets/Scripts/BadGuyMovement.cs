@@ -119,13 +119,29 @@ public class BadGuyMovement : MonoBehaviour
 
     void EndGame()
     {
-        // Destroy background music when transitioning to the statistics scene
-        if (BackgroundAudioManager.Instance != null)
+        StartCoroutine(FlickerBeforeSceneChange());
+    }
+
+    IEnumerator FlickerBeforeSceneChange()
+    {
+        isMoving = true;
+
+        int flickerCount = Random.Range(5, 8); // Slightly more flickers before final scene
+
+        for (int i = 0; i < flickerCount; i++)
         {
-            Destroy(BackgroundAudioManager.Instance.gameObject);
+            screenFade.color = new Color(0, 0, 0, 1); // Black screen
+            yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
+
+            screenFade.color = new Color(0, 0, 0, 0); // Clear screen
+            yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
         }
 
-        // Load the next scene
-        SceneManager.LoadScene("StatisticsScene");
+        // **Final blackout before scene transition**
+        screenFade.color = new Color(0, 0, 0, 1);
+        yield return new WaitForSeconds(1f); // Short pause in full black screen
+
+        SceneManager.LoadScene("BadGuyApproachCutscene");
     }
+
 }
