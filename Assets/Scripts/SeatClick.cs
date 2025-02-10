@@ -18,7 +18,6 @@ public class SeatClick : MonoBehaviour
             // Check if the player presses the interaction button (e.g., left mouse button or "E")
             if (Input.GetMouseButtonDown(0)) // Replace with "Input.GetKeyDown(KeyCode.E)" if desired
             {
-                Debug.Log("Next Scene");
                 StartCoroutine(SitDownAndChangeScene());
             }
         }
@@ -27,7 +26,7 @@ public class SeatClick : MonoBehaviour
     IEnumerator SitDownAndChangeScene()
     {
         // Optional: Add sitting animation or camera effect here
-        yield return new WaitForSeconds(1.5f);
+        yield return new WaitForSeconds(0.5f);
 
         // Load the next scene
         SceneManager.LoadScene(nextSceneName);

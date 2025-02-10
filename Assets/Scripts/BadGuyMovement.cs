@@ -97,7 +97,6 @@ public class BadGuyMovement : MonoBehaviour
                 }
                 if (currentPositionIndex == positions.Length - 1)
                 {
-                    Debug.Log("Game Over - Bad Guy teleported in front!");
                     EndGame();
                 }
             }
