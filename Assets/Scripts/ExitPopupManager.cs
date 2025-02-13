@@ -5,15 +5,12 @@ public class ExitPopupManager : MonoBehaviour
 {
     public GameObject exitPopup;
     private bool isPaused = false;
-
-    private BackgroundAudioManager bgAudioManager;
-    private VoiceOverManager voiceOverManager;
+    private AudioSource dialogAudioSource; // Reference to the dialogue audio
 
     void Start()
     {
-        // Find the BackgroundAudioManager and VoiceOverManager (if they exist)
-        bgAudioManager = FindObjectOfType<BackgroundAudioManager>();
-        voiceOverManager = FindObjectOfType<VoiceOverManager>();
+        // Find the dialogue audio source in the scene
+        dialogAudioSource = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
     }
 
     void Update()
@@ -31,40 +28,46 @@ public class ExitPopupManager : MonoBehaviour
         isPaused = !exitPopup.activeSelf;
         exitPopup.SetActive(isPaused);
 
-        // Pause or resume the game
-        Time.timeScale = isPaused ? 0f : 1f;
+        // Find the Dialog Audio Source in the scene
+        AudioSource dialogAudio = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
 
-        // Show or hide cursor
-        Cursor.visible = isPaused;
-        Cursor.lockState = isPaused ? CursorLockMode.None : CursorLockMode.Locked;
-
-        // Safely pause/resume background audio (only if it exists)
-        if (bgAudioManager != null)
+        if (isPaused)
         {
-            if (isPaused)
-                bgAudioManager.PauseBackgroundAudio();
-            else
-                bgAudioManager.ResumeBackgroundAudio();
+            Time.timeScale = 0f;
+            Cursor.visible = true;
+            Cursor.lockState = CursorLockMode.None;
+
+            // Pause background and dialog audio
+            BackgroundAudioManager.Instance?.PauseBackgroundAudio();
+            if (dialogAudio != null && dialogAudio.isPlaying)
+            {
+                dialogAudio.Pause();
+            }
         }
-
-        // Pause/resume the voice-over AudioSource
-        if (voiceOverManager != null)
+        else
         {
-            if (isPaused)
-                voiceOverManager.PauseVoiceOver();
-            else
-                voiceOverManager.ResumeVoiceOver();
+            Time.timeScale = 1f;
+            Cursor.visible = false;
+            Cursor.lockState = CursorLockMode.Locked;
+
+            // Resume background and dialog audio
+            BackgroundAudioManager.Instance?.ResumeBackgroundAudio();
+            if (dialogAudio != null)
+            {
+                dialogAudio.UnPause();
+            }
         }
     }
+
 
     public void ConfirmExit()
     {
         Time.timeScale = 1f; // Resume time before switching scenes
 
-        // Destroy BackgroundAudioManager safely
-        if (bgAudioManager != null)
+        // Destroy BackgroundAudioManager when returning to main menu
+        if (BackgroundAudioManager.Instance != null)
         {
-            Destroy(bgAudioManager.gameObject);
+            Destroy(BackgroundAudioManager.Instance.gameObject);
         }
 
         SceneManager.LoadScene("MainMenu");

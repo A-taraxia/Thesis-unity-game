@@ -80,18 +80,21 @@ public class SettingsManager : MonoBehaviour
         isPaused = !settingsPanel.activeSelf;
         settingsPanel.SetActive(!settingsPanel.activeSelf);
 
+        // Find the Dialog Audio Source in the scene
+        AudioSource dialogAudio = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
+
         if (settingsPanel.activeSelf)
         {
-            // Ensure volume number updates when opening settings
-            UpdateVolumeText();
-
             Time.timeScale = 0f;
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
-            if (BackgroundAudioManager.Instance != null)
+            // Pause background audio
+            BackgroundAudioManager.Instance?.PauseBackgroundAudio();
+            // Pause dialog audio
+            if (dialogAudio != null && dialogAudio.isPlaying)
             {
-                BackgroundAudioManager.Instance.PauseBackgroundAudio();
+                dialogAudio.Pause();
             }
 
             EventSystem.current?.SetSelectedGameObject(null);
@@ -111,12 +114,16 @@ public class SettingsManager : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
             }
 
-            if (BackgroundAudioManager.Instance != null)
+            // Resume background audio
+            BackgroundAudioManager.Instance?.ResumeBackgroundAudio();
+            // Resume dialog audio
+            if (dialogAudio != null)
             {
-                BackgroundAudioManager.Instance.ResumeBackgroundAudio();
+                dialogAudio.UnPause();
             }
         }
     }
+
 
 
     public void AdjustVolume()

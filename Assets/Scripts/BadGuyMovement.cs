@@ -3,16 +3,15 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-
 public class BadGuyMovement : MonoBehaviour
 {
-    public Transform[] positions; // Assign 4 positions in Inspector
-    public Image screenFade; // Assign a black UI Image covering the screen
-    public float timeBeforeMove = 5f; // Move if not looked at for 5 sec
-    public float timeBeforeFlicker = 900f; // 15 min stare causes flickering
-    public float flickerTotalDuration = 1.2f; // Total flicker duration
-    public float flickerMinTime = 0.05f; // Min time for a flicker
-    public float flickerMaxTime = 0.2f; // Max time for a flicker
+    public Transform[] positions;
+    public Image screenFade;
+    public float timeBeforeMove = 5f;
+    public float timeBeforeFlicker = 900f;
+    public float flickerTotalDuration = 1.2f;
+    public float flickerMinTime = 0.05f;
+    public float flickerMaxTime = 0.2f;
 
     private Camera mainCamera;
     private int currentPositionIndex = 0;
@@ -20,14 +19,20 @@ public class BadGuyMovement : MonoBehaviour
     private float notLookingTime = 0f;
     private float lookingTime = 0f;
 
+    private bool dialogFinished = false;  // New: Prevent movement before intro audio ends
+
     void Start()
     {
         mainCamera = Camera.main;
-        screenFade.color = new Color(0, 0, 0, 0); // Start with a clear screen
+        screenFade.color = new Color(0, 0, 0, 0);
+
+        StartCoroutine(PlayIntroDialog()); // Start the intro dialog before anything else
     }
 
     void Update()
     {
+        if (!dialogFinished) return;  //  New: Wait until dialog finishes
+
         if (IsEnemyVisible())
         {
             notLookingTime = 0f;
@@ -56,6 +61,20 @@ public class BadGuyMovement : MonoBehaviour
         return viewportPoint.z > 0 && viewportPoint.x > 0 && viewportPoint.x < 1 && viewportPoint.y > 0 && viewportPoint.y < 1;
     }
 
+    IEnumerator PlayIntroDialog()
+    {
+        DialogManager voiceOver = FindObjectOfType<DialogManager>();
+        if (voiceOver != null)
+        {
+            yield return voiceOver.PlayVoiceOverWithText("dial2", "BreathingLoop");
+        }
+        else
+        {
+            Debug.LogError("VoiceOverManager not found in the scene!");
+        }
+        dialogFinished = true;
+    }
+
     IEnumerator MoveCloser()
     {
         isMoving = true;
@@ -78,17 +97,16 @@ public class BadGuyMovement : MonoBehaviour
     IEnumerator FlickerAndMove()
     {
         isMoving = true;
-        lookingTime = 0f; // Reset looking time
+        lookingTime = 0f;
 
-        float elapsedTime = 0f;
-        int flickerCount = Random.Range(4, 7); // Randomize flicker count
+        int flickerCount = Random.Range(4, 7);
 
         for (int i = 0; i < flickerCount; i++)
         {
-            screenFade.color = new Color(0, 0, 0, 1); // Black screen
+            screenFade.color = new Color(0, 0, 0, 1);
             yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
 
-            if (i == flickerCount - 2) // Move on the second-to-last flicker
+            if (i == flickerCount - 2)
             {
                 if (currentPositionIndex < positions.Length - 1)
                 {
@@ -101,9 +119,8 @@ public class BadGuyMovement : MonoBehaviour
                 }
             }
 
-            screenFade.color = new Color(0, 0, 0, 0); // Clear screen
+            screenFade.color = new Color(0, 0, 0, 0);
             yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
-            elapsedTime += flickerMinTime + flickerMaxTime;
         }
 
         yield return new WaitForSeconds(1f);
@@ -125,22 +142,20 @@ public class BadGuyMovement : MonoBehaviour
     {
         isMoving = true;
 
-        int flickerCount = Random.Range(5, 8); // Slightly more flickers before final scene
+        int flickerCount = Random.Range(5, 8);
 
         for (int i = 0; i < flickerCount; i++)
         {
-            screenFade.color = new Color(0, 0, 0, 1); // Black screen
+            screenFade.color = new Color(0, 0, 0, 1);
             yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
 
-            screenFade.color = new Color(0, 0, 0, 0); // Clear screen
+            screenFade.color = new Color(0, 0, 0, 0);
             yield return new WaitForSeconds(Random.Range(flickerMinTime, flickerMaxTime));
         }
 
-        // **Final blackout before scene transition**
         screenFade.color = new Color(0, 0, 0, 1);
-        yield return new WaitForSeconds(1f); // Short pause in full black screen
+        yield return new WaitForSeconds(1f);
 
         SceneManager.LoadScene("BadGuyApproachCutscene");
     }
-
 }
