@@ -35,8 +35,10 @@ public class VoiceOverManager : MonoBehaviour
             currentIndex++;
         }
 
-        // After all voice-overs finish, return to the Main Menu
+        // After all voice-overs finish, wait a few seconds, then return to Main Menu
+        yield return new WaitForSeconds(3f);
         SceneManager.LoadScene("MainMenu");
+
     }
 
     public void PauseVoiceOver()

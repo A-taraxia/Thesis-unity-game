@@ -18,20 +18,21 @@ public class BadGuyCutscene : MonoBehaviour
 
     void EndGame()
     {
-        // Load the next scene first
-        SceneManager.LoadScene("StatisticsScene");
-
-        // Delay destroying BackgroundAudioManager to prevent null issues
-        StartCoroutine(DestroyBackgroundAudio());
+        StartCoroutine(HandleSceneTransition());
     }
 
-    IEnumerator DestroyBackgroundAudio()
+    IEnumerator HandleSceneTransition()
     {
-        yield return new WaitForSeconds(1f); // Give time for scene transition
+        // Destroy BackgroundAudioManager first
         if (BackgroundAudioManager.Instance != null)
         {
             Destroy(BackgroundAudioManager.Instance.gameObject);
         }
-    }
 
+        //Wait a short moment for a smoother transition (optional)
+        yield return new WaitForSeconds(0.5f);
+
+        // Load the next scene
+        SceneManager.LoadScene("StatisticsScene");
+    }
 }

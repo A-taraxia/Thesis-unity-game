@@ -82,6 +82,7 @@ public class SettingsManager : MonoBehaviour
 
         // Find the Dialog Audio Source in the scene
         AudioSource dialogAudio = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
+        VoiceOverManager voiceOverManager = FindObjectOfType<VoiceOverManager>();
 
         if (settingsPanel.activeSelf)
         {
@@ -89,13 +90,18 @@ public class SettingsManager : MonoBehaviour
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
-            // Pause background audio
-            BackgroundAudioManager.Instance?.PauseBackgroundAudio();
-            // Pause dialog audio
+            // Only pause if BackgroundAudioManager exists
+            if (BackgroundAudioManager.Instance != null)
+            {
+                BackgroundAudioManager.Instance.PauseBackgroundAudio();
+            }
+
             if (dialogAudio != null && dialogAudio.isPlaying)
             {
                 dialogAudio.Pause();
             }
+
+            voiceOverManager?.PauseVoiceOver();
 
             EventSystem.current?.SetSelectedGameObject(null);
         }
@@ -114,13 +120,18 @@ public class SettingsManager : MonoBehaviour
                 Cursor.lockState = CursorLockMode.Locked;
             }
 
-            // Resume background audio
-            BackgroundAudioManager.Instance?.ResumeBackgroundAudio();
-            // Resume dialog audio
+            // Only resume if BackgroundAudioManager exists
+            if (BackgroundAudioManager.Instance != null)
+            {
+                BackgroundAudioManager.Instance.ResumeBackgroundAudio();
+            }
+
             if (dialogAudio != null)
             {
                 dialogAudio.UnPause();
             }
+
+            voiceOverManager?.ResumeVoiceOver();
         }
     }
 
@@ -147,21 +158,33 @@ public class SettingsManager : MonoBehaviour
 
         if (SceneManager.GetActiveScene().name == "MainMenu")
         {
-            // In Main Menu: Keep the cursor visible and unlocked
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
         }
         else
         {
-            // In gameplay: Hide and lock the cursor
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
         }
 
-        // Resume background audio if it was paused
+        // Resume Background Audio if it still exists
         if (BackgroundAudioManager.Instance != null)
         {
             BackgroundAudioManager.Instance.ResumeBackgroundAudio();
+        }
+
+        // Resume Dialog Audio if it exists in the scene
+        AudioSource dialogAudio = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
+        if (dialogAudio != null)
+        {
+            dialogAudio.UnPause();
+        }
+
+        // Resume VoiceOver if in the Statistics Scene
+        VoiceOverManager voiceOverManager = FindObjectOfType<VoiceOverManager>();
+        if (voiceOverManager != null)
+        {
+            voiceOverManager.ResumeVoiceOver();
         }
     }
     public void OpenSettings()

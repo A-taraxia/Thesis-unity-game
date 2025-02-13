@@ -28,8 +28,9 @@ public class ExitPopupManager : MonoBehaviour
         isPaused = !exitPopup.activeSelf;
         exitPopup.SetActive(isPaused);
 
-        // Find the Dialog Audio Source in the scene
+        // Find Dialog Audio Source in the scene
         AudioSource dialogAudio = GameObject.Find("Dialog Audio Source")?.GetComponent<AudioSource>();
+        VoiceOverManager voiceOverManager = FindObjectOfType<VoiceOverManager>(); // Find voice-over manager
 
         if (isPaused)
         {
@@ -37,11 +38,22 @@ public class ExitPopupManager : MonoBehaviour
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
-            // Pause background and dialog audio
-            BackgroundAudioManager.Instance?.PauseBackgroundAudio();
+            // Pause Background Audio if it exists
+            if (BackgroundAudioManager.Instance != null)
+            {
+                BackgroundAudioManager.Instance.PauseBackgroundAudio();
+            }
+
+            // Pause Dialog Audio if it's playing
             if (dialogAudio != null && dialogAudio.isPlaying)
             {
                 dialogAudio.Pause();
+            }
+
+            // Pause Voice Over if it exists
+            if (voiceOverManager != null)
+            {
+                voiceOverManager.PauseVoiceOver();
             }
         }
         else
@@ -50,14 +62,26 @@ public class ExitPopupManager : MonoBehaviour
             Cursor.visible = false;
             Cursor.lockState = CursorLockMode.Locked;
 
-            // Resume background and dialog audio
-            BackgroundAudioManager.Instance?.ResumeBackgroundAudio();
+            //Resume Background Audio if it exists
+            if (BackgroundAudioManager.Instance != null)
+            {
+                BackgroundAudioManager.Instance.ResumeBackgroundAudio();
+            }
+
+            // Resume Dialog Audio
             if (dialogAudio != null)
             {
                 dialogAudio.UnPause();
             }
+
+            // Resume Voice Over
+            if (voiceOverManager != null)
+            {
+                voiceOverManager.ResumeVoiceOver();
+            }
         }
     }
+
 
 
     public void ConfirmExit()
