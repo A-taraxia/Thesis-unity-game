@@ -3569,7 +3569,7 @@ MonoBehaviour:
   - {fileID: 2118843805}
   - {fileID: 121752122}
   screenFade: {fileID: 1750748147}
-  timeBeforeMove: 5
+  timeBeforeMove: 7
   timeBeforeFlicker: 10
   flickerTotalDuration: 1.5
   flickerMinTime: 0.05

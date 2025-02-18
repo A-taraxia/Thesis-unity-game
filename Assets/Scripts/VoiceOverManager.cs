@@ -37,9 +37,20 @@ public class VoiceOverManager : MonoBehaviour
 
         // After all voice-overs finish, wait a few seconds, then return to Main Menu
         yield return new WaitForSeconds(3f);
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         SceneManager.LoadScene("MainMenu");
 
     }
+    public void UpdateCurrentText()
+    {
+        //  Update the currently displayed text immediately after language change
+        if (scriptText != null && currentIndex < textKeys.Length)
+        {
+            scriptText.text = LocalizationManager.Instance.GetLocalizedText(textKeys[currentIndex]);
+        }
+    }
+
 
     public void PauseVoiceOver()
     {

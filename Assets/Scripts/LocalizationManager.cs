@@ -92,7 +92,16 @@ public class LocalizationManager : MonoBehaviour
         PlayerPrefs.Save();
         activeLanguageDictionary = (currentLanguage == Language.English) ? englishTexts : greekTexts;
 
-        UpdateLocalizedText(); // Update all localized text in the scene
+        // Update all localized text in the scene
+        UpdateLocalizedText();
+
+        // Ensure the statistics scene text updates instantly
+        VoiceOverManager voiceOverManager = FindObjectOfType<VoiceOverManager>();
+        if (voiceOverManager != null)
+        {
+            voiceOverManager.UpdateCurrentText();
+        }
+
         FindObjectOfType<SettingsController>()?.UpdateVolumeText();
     }
 

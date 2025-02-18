@@ -76,6 +76,12 @@ public class SettingsManager : MonoBehaviour
             Debug.LogError("SettingsPanel is not assigned in the Inspector!");
             return;
         }
+        // **Prevent opening Settings if Exit Popup is active**
+        GameObject exitPopup = GameObject.Find("ExitPopup");
+        if (exitPopup != null && exitPopup.activeSelf)
+        {
+            return; // **Exit Popup is open, so don't open Settings**
+        }
 
         isPaused = !settingsPanel.activeSelf;
         settingsPanel.SetActive(!settingsPanel.activeSelf);

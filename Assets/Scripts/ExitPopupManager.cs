@@ -24,6 +24,12 @@ public class ExitPopupManager : MonoBehaviour
     public void ToggleExitPopup()
     {
         if (exitPopup == null) return;
+        // Prevent opening Exit Popup if Settings is active
+        GameObject settingsPanel = GameObject.Find("SettingsPanel");
+        if (settingsPanel != null && settingsPanel.activeSelf)
+        {
+            return; // Settings Panel is open, so don't open Exit Popup**
+        }
 
         isPaused = !exitPopup.activeSelf;
         exitPopup.SetActive(isPaused);
